@@ -589,14 +589,15 @@ class Api:  # pylint: disable=too-many-public-methods
     # 주문 조회------------
 
     # 매매-----------------
-    def _send_kr_order(self, ticker: str, amount: int, price: int, buy: bool) -> Json:
+    def _send_kr_order(self, ticker: str, amount: int, price: int, buy: bool, order_type: str) -> Json:
         """
         국내 주식 매매(현금)
         """
-        order_type = "00"  # 00: 지정가, 01: 시장가, ...
-        if price <= 0:
-            price = 0
-            order_type = "01"   # 시장가
+        if order_type is None:
+            order_type = "00"  # 00: 지정가, 01: 시장가, ...
+            if price <= 0:
+                price = 0
+                order_type = "01"   # 시장가
 
         url_path = "/uapi/domestic-stock/v1/trading/order-cash"
 
@@ -631,6 +632,16 @@ class Api:  # pylint: disable=too-many-public-methods
         price: 주문 가격
         """
         return self._send_kr_order(ticker, amount, price, True)
+
+    def buy_kr_stock_out_of_time(self, ticker: str, amount: int, price: int) -> Json:
+        """
+        국내 주식 매수(현금)
+        ticker: 종목코드
+        amount: 주문 수량
+        price: 주문 가격
+        장 후 시간외 주문
+        """
+        return self._send_kr_order(ticker, amount, price, True, "06")
 
     def sell_kr_stock(self, ticker: str, amount: int, price: int) -> Json:
         """
